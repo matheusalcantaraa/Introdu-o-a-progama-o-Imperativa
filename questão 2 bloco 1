@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+int main(){
+
+    long long N, A, B;
+
+    scanf("%lld", &N);
+    scanf("%lld %lld", &A, &B);
+
+    long long total = N*(N+1)/2;
+
+    long long Ka = N/A;
+    long long Kb = N/B;
+    long long Kab = N/(A*B);
+
+    long long somaA = A*Ka*(Ka+1)/2;
+    long long somaB = B*Kb*(Kb+1)/2;
+    long long somaAB = (A*B)*Kab*(Kab+1)/2;
+
+    long long resultado = total - somaA - somaB + somaAB;
+
+    printf("%lld\n", resultado);
+
+    if(resultado % 2 == 0)
+        printf("Lá ele!!!");
+    else
+        printf("Opa xupenio AULAS...");
+
+    return 0;
+}
+// essa eu usei IA chat GPT primeiro p entender oque a questão queria dps entendi as formulas e como chegar nelas e fiz sozinho.
+// mas começou a dar erro no submit, ai perguntei o pq a IA e ela me recomendou a usar long long ao inves de int, troquei e deu certo.
