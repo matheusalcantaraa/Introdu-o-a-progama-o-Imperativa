@@ -1,0 +1,91 @@
+#include <stdio.h>
+
+int main(){
+    int x,y,evitar,quadrante_esta;
+
+
+    scanf("%d %d %d", &x, &y, &evitar);
+    if(x>0 && y>0){
+        quadrante_esta = 1;
+    } else if(x<0 && y>0){
+        quadrante_esta = 2;  
+    } else if(x<0 && y<0){
+        quadrante_esta = 3;
+    } else {
+        quadrante_esta = 4;
+    }
+    if(quadrante_esta == evitar){
+        printf("caminhada invalida\n");
+    } else {
+        int destino;
+        
+        if(quadrante_esta == 1) {
+            destino = 3;
+        } else if(quadrante_esta == 2) {
+            destino = 4;
+        } else if(quadrante_esta == 3){ 
+            destino = 1;
+        } else {
+            destino = 2;
+        }
+        int xd, yd;
+
+        switch(destino){
+            case 1:
+                xd = 1;
+                yd = 1;
+                break;
+            case 2:
+                xd = -1;
+                yd = 1;
+                break;
+            case 3:
+                xd = -1;
+                yd = -1;
+                break;
+            case 4:
+                xd = 1;
+                yd = -1;
+                break;
+        }
+        int passos_x;
+        int passos_y;
+        if(x > xd){ 
+            passos_x = x - xd;
+        }else{
+            passos_x = xd - x;
+        }
+        if(y > yd){ 
+            passos_y = y - yd;
+        }else{
+            passos_y = yd - y;
+        }
+        int qx = quadrante_esta - 1;
+        if(qx == 0){
+             qx = 4;
+        }
+
+        int quadrante_intermediario;
+
+        if(xd > 0 && y > 0){
+            quadrante_intermediario = 1;
+        }else if(xd < 0 && y > 0){
+            quadrante_intermediario = 2;
+        }else if(xd < 0 && y < 0){
+            quadrante_intermediario = 3;
+        }else{
+            quadrante_intermediario = 4;
+        }
+
+        if(quadrante_intermediario == evitar){
+            printf("%d passos em y e %d passos em x\n", passos_y, passos_x);
+        }else{
+            printf("%d passos em x e %d passos em y\n", passos_x, passos_y);
+        }
+    }
+}
+
+
+//esse eu demorei um pouco a pensar como fazer e toda vez que eu fazia dava um erro diferente
+// ate que eu perguntei a IA o pq tava dando erro e ela me sinalizou
+// ela recomendou que eu usasse no final o quadrante intermediario, ai deu certo
