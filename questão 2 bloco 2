@@ -1,0 +1,46 @@
+#include <stdio.h>
+
+int main(){
+
+    int N,K,P;
+    scanf("%d %d %d", &N, &K, &P);
+
+    int primeiro = -1;
+    int numero_valido = 0;
+
+    for(int numero = N; numero < K; numero++){
+        int copia = numero;
+        int fatores = 0;
+        int invalido = 0;
+        while(copia % 2 == 0){
+            copia = copia / 2;
+        }
+        for(int i = 3; i*i <= numero; i = i + 2){
+            int contador = 0;
+            while(copia % i == 0){
+                contador++;
+                copia = copia / i;
+            }
+            if(contador > 1){
+                invalido = 1;
+            }
+            if(contador == 1){
+                fatores++;
+            }
+        }
+        if(copia > 2 && copia % 2 != 0){
+            fatores++;
+        }
+        if(invalido == 0 && fatores == P){
+            if(primeiro == -1){
+                primeiro = numero;
+            }
+            numero_valido++;
+        }
+    }
+    if(numero_valido == 0){
+        printf("Poxa dudinha, me desculpa, nao achei os numeros mas vou te mandar uma foto de um gatinho fofo.");
+    }else{
+        printf("%d %d", primeiro, numero_valido);
+    }
+}
