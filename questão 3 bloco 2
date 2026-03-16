@@ -1,0 +1,67 @@
+#include <stdio.h>
+
+int main(){
+    int X,N,a,b;
+    scanf("%d %d", &X, &N);
+
+    int melhor_canal, melhor_minuto, melhor_termo;
+    int menor_distancia = 1000000;
+    for(int i=0; i<N; i++){
+        scanf("%d %d", &a, &b);
+        int f1,f2,f3,minuto;
+        f1 = a;
+        f2 = b;
+        minuto = 2;
+        
+        while(f2 < X){
+            f3 = f1+f2;
+            f1 = f2;
+            f2 = f3;
+            minuto++;
+        }
+        int d1 = X - f1;
+        if(d1 < 0){
+            d1 = -d1;
+        }
+        int d2 = X - f2;
+        if(d2 < 0){
+            d2 = -d2;
+        }
+        int termo, distancia, min_escolhido;
+
+        if(d1 <= d2){
+            termo = f1;
+            distancia = d1;
+            min_escolhido = minuto-1;
+        } else {
+            termo = f2;
+            distancia = d2;
+            min_escolhido = minuto;
+        }
+        if(distancia < menor_distancia){
+            menor_distancia = distancia;
+            melhor_canal = i + 1;
+            melhor_minuto = min_escolhido;
+            melhor_termo = termo;
+        }
+        else{
+            if(distancia == menor_distancia){
+                melhor_canal = i + 1;
+                melhor_minuto = min_escolhido;
+                melhor_termo = termo;
+            }
+        }
+    }
+    int soma = 0;
+    int temp = melhor_termo;
+
+    while(temp > 0){
+        soma = soma + temp % 10;
+        temp = temp / 10;
+    }
+    if(soma>10){
+        printf("Xupenio, para ir ao lulupalooza vc deve entrar no canal %d e sera chamado mais ou menos no minuto %d e com o VIP garantido!!!\n", melhor_canal, melhor_minuto);
+    } else{
+     printf("Xupenio, para ir ao lulupalooza vc deve entrar no canal %d e sera chamado mais ou menos no minuto %d, mas o ingresso VIP não vai rolar :(\n", melhor_canal, melhor_minuto);
+        }
+}
