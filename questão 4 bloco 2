@@ -1,0 +1,84 @@
+#include <stdio.h>
+
+int main(){
+    int q;
+    scanf("%d", &q);
+    int posicao = 0;
+    for(int i = 0; i < q; i++){
+        int X;
+        char direcao;
+        scanf(" %d %c", &X, &direcao);
+        if(direcao == 'D'){
+            if(posicao == 0){
+                for(int j = 0; j < X; j++){
+                    printf(".");
+                }
+            } else {
+                for(int k = 0; k < posicao - 1; k++){
+                    printf(" ");
+                }
+                for(int j = 0; j < X + 1; j++){
+                    printf(".");
+                }
+            }
+            posicao = posicao + X;
+            printf("\n");
+        }
+        else if(direcao == 'E'){
+            if(posicao - X < 0){
+                printf("Informacao invalida");
+                return 0;
+            }
+            posicao = posicao - X;
+            for(int k = 0; k < posicao - 1; k++){
+                printf(" ");
+            }
+            for(int j = 0; j < X + 1; j++){
+                printf(".");
+            }
+            printf("\n");
+        }
+        else if(direcao == 'B'){
+            for(int j = 0; j < X - 1; j++){
+                for(int k = 0; k < posicao - 1; k++){
+                    printf(" ");
+                }
+                printf(".\n");
+            }
+            if(i < q - 1){
+                int X2;
+                char direcao2;
+                scanf(" %d %c", &X2, &direcao2);
+                i++;
+                if(direcao2 == 'D'){
+                    for(int k = 0; k < posicao - 1; k++){
+                        printf(" ");
+                    }
+                    printf(".");
+                    for(int j = 0; j < X2; j++){
+                        printf(".");
+                    }
+                    posicao = posicao + X2;
+                } else if(direcao2 == 'E'){
+                    if(posicao - X2 < 0){
+                        printf("Informacao invalida");
+                        return 0;
+                    }
+                    posicao = posicao - X2;
+                    for(int k = 0; k < posicao - 1; k++){
+                        printf(" ");
+                    }
+                    for(int j = 0; j < X2 + 1; j++){
+                        printf(".");
+                    }
+                }
+            } else {
+                for(int k = 0; k < posicao - 1; k++){
+                    printf(" ");
+                }
+                printf(".");
+            }
+            printf("\n");
+        }
+    }
+}
