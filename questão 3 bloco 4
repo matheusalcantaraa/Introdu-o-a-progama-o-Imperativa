@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+void imprimir(int my, int mx){
+    printf("Coordenada X:%d, Y:%d", my, mx);
+}
+
+int main(){
+    int cidade[4][4] = {0};
+    int x = 0, y = 0;
+    cidade[0][0]++;
+
+    for(int i = 0; i < 20; i++){
+        char direcao;
+        scanf(" %c", &direcao);
+        if(direcao == 'c' && x > 0) x--;
+        else if(direcao == 'b' && x < 3) x++;
+        else if(direcao == 'e' && y > 0) y--;
+        else if(direcao == 'd' && y < 3) y++;
+        cidade[x][y]++;
+    }
+
+    int maior = 0, mx = 0, my = 0;
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            if(cidade[i][j] > maior){
+                maior = cidade[i][j];
+                mx = i;
+                my = j;
+            }
+        }
+    }
+    imprimir(my, mx);
+}
