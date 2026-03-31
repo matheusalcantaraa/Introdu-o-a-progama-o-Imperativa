@@ -1,0 +1,64 @@
+#include <stdio.h>
+
+void cair(char parede[][100], int X, int Y, int coluna_inicial){
+    int fila_col[1000];
+    int fila_lin[1000];
+    int inicio = 0, fim = 0;
+    fila_col[fim] = coluna_inicial;
+    fila_lin[fim] = 1;
+    fim++;
+
+    while(inicio < fim){
+        int coluna = fila_col[inicio];
+        int linha = fila_lin[inicio];
+        inicio++;
+
+        while(linha < X && parede[linha][coluna] == '.'){
+            parede[linha][coluna] = 'o';
+            linha++;
+        }
+        if(linha < X && parede[linha][coluna] == '#'){
+            int esquerda = coluna;
+            while(esquerda >= 0 && parede[linha][esquerda] == '#'){
+                esquerda--;
+            }
+            int direita = coluna;
+            while(direita < Y && parede[linha][direita] == '#'){
+                direita++;
+            }
+            parede[linha][esquerda] = 'o';
+            parede[linha][direita] = 'o';
+            for(int j = esquerda; j <= direita; j++){
+                if(parede[linha-1][j] == '.') parede[linha-1][j] = 'o';
+            }
+            fila_col[fim] = esquerda;
+            fila_lin[fim] = linha + 1;
+            fim++;
+            fila_col[fim] = direita;
+            fila_lin[fim] = linha + 1;
+            fim++;
+        }
+    }
+}
+
+int main(){
+    int X, Y;
+    scanf("%d %d", &X, &Y);
+    char parede[100][100];
+    for(int i = 0; i < X; i++){
+        for(int j = 0; j < Y; j++){
+            scanf(" %c", &parede[i][j]);
+        }
+    }
+    for(int j = 0; j < Y; j++){
+        if(parede[0][j] == 'o'){
+            cair(parede, X, Y, j);
+        }
+    }
+    for(int i = 0; i < X; i++){
+        for(int j = 0; j < Y; j++){
+            printf("%c", parede[i][j]);
+        }
+        printf("\n");
+    }
+}
