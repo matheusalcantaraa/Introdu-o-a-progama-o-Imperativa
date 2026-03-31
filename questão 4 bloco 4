@@ -1,0 +1,76 @@
+#include <stdio.h>
+
+int linhas, colunas;
+char mapa[100][100];
+int distancia[100][100];
+
+void bfs(int linha_inicial, int coluna_inicial){
+    int fila_lin[10000];
+    int fila_col[10000];
+    int inicio = 0, fim = 0;
+
+    fila_lin[fim] = linha_inicial;
+    fila_col[fim] = coluna_inicial;
+    fim++;
+    distancia[linha_inicial][coluna_inicial] = 0;
+
+    int direcao_lin[4] = {-1, 1, 0, 0};
+    int direcao_col[4] = {0, 0, -1, 1};
+
+    while(inicio < fim){
+        int linha = fila_lin[inicio];
+        int coluna = fila_col[inicio];
+        inicio++;
+
+        for(int i = 0; i < 4; i++){
+            int nova_linha = linha + direcao_lin[i];
+            int nova_col = coluna + direcao_col[i];
+
+            if(nova_linha >= 0 && nova_linha < linhas &&
+               nova_col >= 0 && nova_col < colunas &&
+               mapa[nova_linha][nova_col] != '#' &&
+               distancia[nova_linha][nova_col] == -1){
+                distancia[nova_linha][nova_col] = distancia[linha][coluna] + 1;
+                fila_lin[fim] = nova_linha;
+                fila_col[fim] = nova_col;
+                fim++;
+            }
+        }
+    }
+}
+
+int main(){
+    scanf("%dx%d", &linhas, &colunas);
+
+    for(int i = 0; i < linhas; i++){
+        for(int j = 0; j < colunas; j++){
+            distancia[i][j] = -1;
+        }
+    }
+
+    int origem_lin, origem_col;
+    int destino_lin, destino_col;
+
+    for(int i = 0; i < linhas; i++){
+        scanf(" ");
+        for(int j = 0; j < colunas; j++){
+            scanf("%c", &mapa[i][j]);
+            if(mapa[i][j] == 'o'){
+                origem_lin = i;
+                origem_col = j;
+            }
+            if(mapa[i][j] == 'd'){
+                destino_lin = i;
+                destino_col = j;
+            }
+        }
+    }
+
+    bfs(origem_lin, origem_col);
+
+    if(distancia[destino_lin][destino_col] == -1){
+        printf("Poxa... Parece que nao foi dessa vez que Rebeka conseguiu fugir\n");
+    } else {
+        printf("Apos correr %d metros e quase desistir por causa da distância, Rebeka conseguiu escapar!\n", distancia[destino_lin][destino_col]);
+    }
+}
