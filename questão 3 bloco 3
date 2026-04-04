@@ -1,0 +1,79 @@
+#include <stdio.h>
+
+int main(){
+    char palavra[101];
+    fgets(palavra, 101, stdin);
+    int i = 0;
+    int inicio[101];
+    int tamanho[101];
+    int n_palavras = 0;
+    while(palavra[i] != '\0'){
+        if((palavra[i] >= 'a' && palavra[i] <= 'z') || (palavra[i] >= 'A' && palavra[i] <= 'Z')){
+            inicio[n_palavras] = i;
+            tamanho[n_palavras] = 0;
+            while((palavra[i] >= 'a' && palavra[i] <= 'z') || (palavra[i] >= 'A' && palavra[i] <= 'Z')){
+                tamanho[n_palavras]++;
+                i++;
+            }
+            n_palavras++;
+        }else{
+            i++;
+        }
+    }
+    
+    int n_pares = 0;
+    int par_a[50];
+    int par_b[50];
+
+    for(int a = 0; a < n_palavras; a++){
+        for(int b = a+1; b < n_palavras; b++){    
+            if(tamanho[a] != tamanho[b]){
+                continue;
+            }
+            int cont[26] = {0};
+            for(int k = inicio[a]; k<inicio[a] + tamanho[a]; k++){
+                char c = palavra[k];
+                if(c >= 'A' && c<= 'Z'){
+                    c = c + 32;
+                }
+                cont[c - 'a']++;
+            }
+            for(int k = inicio[b]; k < inicio[b] + tamanho[b]; k++){
+                char c = palavra[k];
+                if(c >= 'A' && c <= 'Z'){
+                    c = c + 32;
+                }
+                cont[c - 'a']--;
+            }
+            int anagramas = 1;
+            for(int k = 0; k < 26; k++){
+                if(cont[k] != 0){
+                    anagramas = 0;
+                }
+            }
+            if(anagramas==1){
+                par_a[n_pares] = a;
+                par_b[n_pares] = b;
+                n_pares++;
+            }
+        }
+    }
+    if(n_pares == 0){
+        printf("Nao existem anagramas na frase.");
+    } else {
+        printf("Pares de anagramas encontrados:\n");
+        for(int k = 0; k < n_pares; k++){
+            int a = par_a[k];
+            int b = par_b[k];
+            for(int j = inicio[a]; j < inicio[a] + tamanho[a]; j++){
+                printf("%c", palavra[j]);
+            }
+            printf(" e ");
+            for(int j = inicio[b]; j < inicio[b] + tamanho[b]; j++){
+                printf("%c", palavra[j]);
+            }
+            printf("\n");
+        }
+        printf("\nTotal de pares: %d\n", n_pares);
+    }
+}
