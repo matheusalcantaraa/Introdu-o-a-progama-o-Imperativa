@@ -1,0 +1,59 @@
+#include <stdio.h>
+
+int main(){
+    int N, X, Y;
+    scanf("%d", &N);
+    scanf("%d", &X);
+    scanf("%d", &Y);
+
+    char horario[Y][6];
+    int latas[Y];
+    for(int i = 0; i < Y; i++){
+        scanf("%s %d", horario[i], &latas[i]);
+    }
+
+    int numero_cliente[Y];
+    for(int i = 0; i < Y; i++){
+        int h, m;
+        sscanf(horario[i], "%d:%d", &h, &m);
+        int minutos = h * 60 + m;
+        numero_cliente[i] = (minutos - 420) / 3;
+    }
+    int total = 0;
+    int vencedor = 0, latas_vencedor = 0;
+    for(int i = 1; i <= N; i++){
+    int latas_cliente = 0;
+    
+    for(int j = 0; j < Y; j++){
+        if(numero_cliente[j] == i){
+            latas_cliente = latas[j];
+        }
+    }
+    if(latas_cliente == 0 && X != 0 && i % X == 0){
+        latas_cliente = 1;
+    }
+    total += latas_cliente;
+    if(total>=50){
+        vencedor = i;
+        latas_vencedor = latas_cliente;
+        break;
+    }
+}
+    if(vencedor == 0){
+        if(50 - total == 1){
+            printf("Ainda nao foram vendidas latas suficientes. Falta %d lata.\n", 50 - total);
+        } else {
+            printf("Ainda nao foram vendidas latas suficientes. Faltam %d latas.\n", 50 - total);
+        }
+    } else {
+        int minutos_vencedor = 420 + (vencedor) * 3;
+        int h = minutos_vencedor / 60;
+        int m = minutos_vencedor % 60;
+
+        if(latas_vencedor == 1){
+            printf("Quem levou a cesta basica foi o %d* cliente atendido por coragem, as %02d:%02d. Que comprou %d lata.\n", vencedor, h, m, latas_vencedor);
+        } else {
+            printf("Quem levou a cesta basica foi o %d* cliente atendido por coragem, as %02d:%02d. Que comprou %d latas.\n", vencedor, h, m, latas_vencedor);
+        }
+    }
+}
