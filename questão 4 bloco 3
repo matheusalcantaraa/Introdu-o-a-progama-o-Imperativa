@@ -1,0 +1,63 @@
+#include <stdio.h>
+
+int main(){
+    int R;
+    scanf("%d", &R);
+    char gigante[100000];
+    int tam_gigante = 0;
+    gigante[0] = '\0';
+    for(int i = 0; i < R; i++){
+        char S[61];
+        int F;
+        scanf("%s %d", S, &F);
+        int tamanho = 0;
+        while(S[tamanho] != '\0'){
+            tamanho++;
+        }
+        for(int c = 0; c < F; c++){
+            int j = 0;
+            while(j < tamanho){
+                if(S[j] == 'X'){
+                    S[j] = 'O';
+                } else {
+                    S[j] = 'X';
+                }
+                if(S[j] == 'O'){
+                    break;
+                }
+                j++;
+            }
+        }
+        printf("%s\n", S);
+        if(i == 0){
+            int k = 0;
+            while(S[k] != '\0'){
+                gigante[k] = S[k];
+                k++;
+            }
+            tam_gigante = k;
+            gigante[tam_gigante] = '\0';
+        } else {
+            char ornamento;
+            if(tam_gigante % 2 == 0 && gigante[tam_gigante - 1] == S[0]){
+                ornamento = '@';
+            } else if(tam_gigante % 2 == 1 && gigante[tam_gigante - 1] == S[0]){
+                ornamento = '#';
+            } else if(tam_gigante % 2 == 0 && gigante[tam_gigante - 1] != S[0]){
+                ornamento = '$';
+            } else {
+                ornamento = '%';
+            }
+            gigante[tam_gigante] = ornamento;
+            tam_gigante++;
+            int k = 0;
+            while(S[k] != '\0'){
+                gigante[tam_gigante] = S[k];
+                tam_gigante++;
+                k++;
+            }
+            gigante[tam_gigante] = '\0';
+        }
+    }
+    printf("%s\n", gigante);
+}
