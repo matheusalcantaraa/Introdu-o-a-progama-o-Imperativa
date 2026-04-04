@@ -1,0 +1,38 @@
+#include <stdio.h>
+
+int main(){
+    int T;
+    scanf("%d", &T);
+    for(int i = 0; i < T; i++){
+        int N;
+        scanf("%d", &N);
+        int sequencia[N];
+        for(int j = 0; j < N; j++){
+            scanf("%d", &sequencia[j]);
+        }
+
+        int melhor_inicio = 0, melhor_tam = 0;
+        int inicio = 0, tam = 1;
+
+        for(int j = 1; j < N; j++){
+            if(sequencia[j] < sequencia[j-1]){
+                tam++;
+                if(tam > melhor_tam){
+                    melhor_tam = tam;
+                    melhor_inicio = inicio;
+                }
+            } else {
+                inicio = j;
+                tam = 1;
+            }
+        }
+
+        printf("%d\n", melhor_tam);
+        if(melhor_tam > 1){
+            for(int j = melhor_inicio; j < melhor_inicio + melhor_tam; j++){
+                printf("%d ", sequencia[j]);
+            }
+            printf("\n");
+        }
+    }
+}
