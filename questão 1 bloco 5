@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int* ler_lugares(int *quantidade) {
+    int *lugares = NULL;
+    int n;
+
+    while (scanf("%d", &n) == 1) {
+        lugares = realloc(lugares, (*quantidade + 1) * sizeof(int));
+        lugares[*quantidade] = n;
+        (*quantidade)++;
+    }
+
+    return lugares;
+}
+
+void impar(int *lugares, int quantidade) {
+    for (int i = 0; i < quantidade; i++) {
+        if (lugares[i] % 2 != 0) {
+            printf("%d\n", lugares[i]);
+        }
+    }
+}
+
+void par(int *lugares, int quantidade) {
+    for (int i = 0; i < quantidade; i++) {
+        if (lugares[i] % 2 == 0) {
+            printf("%d\n", lugares[i]);
+        }
+    }
+}
+
+int main() {
+    int quantidade = 0;
+
+    int *lugares = ler_lugares(&quantidade);
+
+    printf("Mais um bom dia de trabalho!\n");
+    impar(lugares, quantidade);
+    par(lugares, quantidade);
+    printf("Vou visitar esses lugares de novo... algum dia.\n");
+
+    free(lugares);
+    return 0;
+}
+
+// aprendi melhor como usar função e essa questão é facil
