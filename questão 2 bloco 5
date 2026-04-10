@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int comparar(const void *a, const void *b) {
+    float nota_a = *(float*)a, nota_b = *(float*)b;
+    return (nota_a > nota_b) - (nota_a < nota_b);
+}
+
+float calcular_media(float *notas, int total_alunos) {
+    float soma = 0;
+    for (int i = 0; i < total_alunos; i++) soma += notas[i];
+    return soma / total_alunos;
+}
+
+int buscar_maior(float *notas, int total_alunos) {
+    int indice_maior = 0;
+    for (int i = 1; i < total_alunos; i++)
+        if (notas[i] > notas[indice_maior]) indice_maior = i;
+    return indice_maior;
+}
+
+int buscar_menor(float *notas, int total_alunos) {
+    int indice_menor = 0;
+    for (int i = 1; i < total_alunos; i++)
+        if (notas[i] < notas[indice_menor]) indice_menor = i;
+    return indice_menor;
+}
+
+int contar_acima_da_media(float *notas, int total_alunos, float media) {
+    int quantidade_acima = 0;
+    for (int i = 0; i < total_alunos; i++)
+        if (notas[i] > media) quantidade_acima++;
+    return quantidade_acima;
+}
+
+float calcular_mediana(float *notas_ordenadas, int total_alunos) {
+    if (total_alunos % 2 != 0)
+        return notas_ordenadas[total_alunos / 2];
+    return (notas_ordenadas[total_alunos/2 - 1] + notas_ordenadas[total_alunos/2]) / 2.0;
+}
+
+float calcular_moda(float *notas_ordenadas, int total_alunos) {
+    float moda = notas_ordenadas[0];
+    int maior_frequencia = 1, frequencia_atual = 1, moda_unica = 1;
+    for (int i = 1; i < total_alunos; i++) {
+        if (notas_ordenadas[i] == notas_ordenadas[i-1]) {
+            frequencia_atual++;
+            if (frequencia_atual > maior_frequencia) {
+                maior_frequencia = frequencia_atual;
+                moda = notas_ordenadas[i];
+                moda_unica = 1;
+            } else if (frequencia_atual == maior_frequencia) {
+                moda_unica = 0;
+            }
+        } else {
+            frequencia_atual = 1;
+        }
+    }
+    if (maior_frequencia == 1 || !moda_unica) return -1;
+    return moda;
+}
+
+void relatorio(float *notas, int total_alunos) {
+    float media = calcular_media(notas, total_alunos);
+    int indice_maior = buscar_maior(notas, total_alunos);
+    int indice_menor = buscar_menor(notas, total_alunos);
+    int quantidade_acima = contar_acima_da_media(notas, total_alunos, media);
+
+    float *notas_ordenadas = malloc(total_alunos * sizeof(float));
+    for (int i = 0; i < total_alunos; i++) notas_ordenadas[i] = notas[i];
+    qsort(notas_ordenadas, total_alunos, sizeof(float), comparar);
+
+    float mediana = calcular_mediana(notas_ordenadas, total_alunos);
+    float moda = calcular_moda(notas_ordenadas, total_alunos);
+
+    printf("Media: %.2f\n", media);
+    printf("Maior nota: %.2f (aluno %d)\n", notas[indice_maior], indice_maior + 1);
+    printf("Menor nota: %.2f (aluno %d)\n", notas[indice_menor], indice_menor + 1);
+    printf("Acima da media: %d\n", quantidade_acima);
+    printf("Mediana: %.2f\n", mediana);
+    if (moda == -1)
+        printf("Moda: Nao ha moda unica\n");
+    else
+        printf("Moda: %.2f\n", moda);
+
+    free(notas_ordenadas);
+}
+
+int main() {
+    int quantidade_inicial;
+    scanf("%d", &quantidade_inicial);
+
+    float *notas = malloc(quantidade_inicial * sizeof(float));
+    for (int i = 0; i < quantidade_inicial; i++) scanf("%f", &notas[i]);
+
+    printf("Relatorio inicial\n");
+    relatorio(notas, quantidade_inicial);
+
+    int quantidade_novas;
+    scanf("%d", &quantidade_novas);
+
+    int total_alunos = quantidade_inicial + quantidade_novas;
+    notas = realloc(notas, total_alunos * sizeof(float));
+    for (int i = quantidade_inicial; i < total_alunos; i++) scanf("%f", &notas[i]);
+
+    printf("\nRelatorio atualizado\n");
+    relatorio(notas, total_alunos);
+
+    free(notas);
+    return 0;
+}
+
+// essa foi um pouquinho mais puxada mas nada extraordinario deu p fazer
