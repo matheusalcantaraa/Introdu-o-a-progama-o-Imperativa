@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char* ler_string() {
+    char *string = malloc(1);
+    if (!string) { printf("Erro de alocacao\n"); exit(1); }
+
+    int tamanho = 0;
+    int caractere_lido;
+    while ((caractere_lido = getchar()) != '\n' && caractere_lido != EOF) {
+        char *temp = realloc(string, tamanho + 2);
+        if (!temp) { printf("Erro de alocacao\n"); free(string); exit(1); }
+        string = temp;
+        string[tamanho++] = (char)caractere_lido;
+    }
+    string[tamanho] = '\0';
+    return string;
+}
+
+char* mesclar(char **strings, int quantidade_strings) {
+    int *tamanhos = malloc(quantidade_strings * sizeof(int));
+    if (!tamanhos) { printf("Erro de alocacao\n"); exit(1); }
+
+    int tamanho_total = 0;
+    for (int i = 0; i < quantidade_strings; i++) {
+        tamanhos[i] = (int)strlen(strings[i]);
+        tamanho_total += tamanhos[i];
+    }
+
+    char *resultado = malloc(tamanho_total + 1);
+    if (!resultado) { printf("Erro de alocacao\n"); free(tamanhos); exit(1); }
+
+    int posicao_mesclada = 0;
+    int posicao_atual = 0;
+    int ainda_tem_caractere = 1;
+
+    while (ainda_tem_caractere) {
+        ainda_tem_caractere = 0;
+        for (int i = 0; i < quantidade_strings; i++) {
+            if (posicao_atual < tamanhos[i]) {
+                resultado[posicao_mesclada++] = strings[i][posicao_atual];
+                ainda_tem_caractere = 1;
+            }
+        }
+        posicao_atual++;
+    }
+
+    resultado[posicao_mesclada] = '\0';
+    free(tamanhos);
+    return resultado;
+}
+
+char* fundir(char *string_mesclada) {
+    char *resultado = malloc(strlen(string_mesclada) + 1);
+    if (!resultado) { printf("Erro de alocacao\n"); exit(1); }
+    strcpy(resultado, string_mesclada);
+
+    int houve_fusao = 1;
+    while (houve_fusao) {
+        houve_fusao = 0;
+        int pos = 0;
+        while (pos < (int)strlen(resultado) - 1) {
+            if (resultado[pos] == resultado[pos + 1]) {
+                char fundido = (resultado[pos] == 'z') ? 'a' : resultado[pos] + 1;
+                int len = (int)strlen(resultado);
+                for (int j = pos + 1; j < len - 1; j++)
+                    resultado[j] = resultado[j + 1];
+                resultado[len - 1] = '\0';
+                resultado[pos] = fundido;
+                houve_fusao = 1;
+                pos++; /* avança — não retrocede */
+            } else {
+                pos++;
+            }
+        }
+    }
+
+    return resultado;
+}
+
+int main() {
+    int quantidade_strings;
+    scanf("%d", &quantidade_strings);
+    getchar();
+
+    char **strings = malloc(quantidade_strings * sizeof(char*));
+    if (!strings) { printf("Erro de alocacao\n"); return 1; }
+
+    for (int i = 0; i < quantidade_strings; i++)
+        strings[i] = ler_string();
+
+    char *string_mesclada = mesclar(strings, quantidade_strings);
+    char *string_fundida = fundir(string_mesclada);
+
+    printf("%s\n%s\n", string_mesclada, string_fundida);
+
+    for (int i = 0; i < quantidade_strings; i++) free(strings[i]);
+    free(strings);
+    free(string_mesclada);
+    free(string_fundida);
+
+    return 0;
+}
+
+
+// essa foi mto dificil, recorri a ia p achar o erro pq n tva achando de jeito nenhum(nem a ia kkkkkkkk) ai uma hora consegui entender oq era
