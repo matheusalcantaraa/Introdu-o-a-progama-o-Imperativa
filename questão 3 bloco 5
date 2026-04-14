@@ -3,33 +3,28 @@
 #include <string.h>
 
 char* ler_string() {
-    char *string = malloc(1);
+    char *string = malloc(sizeof(char));
     if (!string) { printf("Erro de alocacao\n"); exit(1); }
 
     int tamanho = 0;
-    int caractere_lido;
+    char caractere_lido;
     while ((caractere_lido = getchar()) != '\n' && caractere_lido != EOF) {
-        char *temp = realloc(string, tamanho + 2);
+        char *temp = realloc(string, (tamanho + 2) * sizeof(char));
         if (!temp) { printf("Erro de alocacao\n"); free(string); exit(1); }
         string = temp;
-        string[tamanho++] = (char)caractere_lido;
+        string[tamanho++] = caractere_lido;
     }
     string[tamanho] = '\0';
     return string;
 }
 
 char* mesclar(char **strings, int quantidade_strings) {
-    int *tamanhos = malloc(quantidade_strings * sizeof(int));
-    if (!tamanhos) { printf("Erro de alocacao\n"); exit(1); }
-
     int tamanho_total = 0;
-    for (int i = 0; i < quantidade_strings; i++) {
-        tamanhos[i] = (int)strlen(strings[i]);
-        tamanho_total += tamanhos[i];
-    }
+    for (int i = 0; i < quantidade_strings; i++)
+        tamanho_total += strlen(strings[i]);
 
-    char *resultado = malloc(tamanho_total + 1);
-    if (!resultado) { printf("Erro de alocacao\n"); free(tamanhos); exit(1); }
+    char *resultado = malloc((tamanho_total + 1) * sizeof(char));
+    if (!resultado) { printf("Erro de alocacao\n"); exit(1); }
 
     int posicao_mesclada = 0;
     int posicao_atual = 0;
@@ -38,7 +33,7 @@ char* mesclar(char **strings, int quantidade_strings) {
     while (ainda_tem_caractere) {
         ainda_tem_caractere = 0;
         for (int i = 0; i < quantidade_strings; i++) {
-            if (posicao_atual < tamanhos[i]) {
+            if (posicao_atual < (int)strlen(strings[i])) {
                 resultado[posicao_mesclada++] = strings[i][posicao_atual];
                 ainda_tem_caractere = 1;
             }
@@ -47,32 +42,25 @@ char* mesclar(char **strings, int quantidade_strings) {
     }
 
     resultado[posicao_mesclada] = '\0';
-    free(tamanhos);
     return resultado;
 }
 
 char* fundir(char *string_mesclada) {
-    char *resultado = malloc(strlen(string_mesclada) + 1);
+    char *resultado = malloc((strlen(string_mesclada) + 1) * sizeof(char));
     if (!resultado) { printf("Erro de alocacao\n"); exit(1); }
     strcpy(resultado, string_mesclada);
 
-    int houve_fusao = 1;
-    while (houve_fusao) {
-        houve_fusao = 0;
-        int pos = 0;
-        while (pos < (int)strlen(resultado) - 1) {
-            if (resultado[pos] == resultado[pos + 1]) {
-                char fundido = (resultado[pos] == 'z') ? 'a' : resultado[pos] + 1;
-                int len = (int)strlen(resultado);
-                for (int j = pos + 1; j < len - 1; j++)
-                    resultado[j] = resultado[j + 1];
-                resultado[len - 1] = '\0';
-                resultado[pos] = fundido;
-                houve_fusao = 1;
-                pos++; /* avança — não retrocede */
-            } else {
-                pos++;
-            }
+    int posicao_atual = 0;
+    while (posicao_atual < (int)strlen(resultado) - 1) {
+        if (resultado[posicao_atual] == resultado[posicao_atual + 1]) {
+            resultado[posicao_atual] = (resultado[posicao_atual] == 'z') ? 'a' : resultado[posicao_atual] + 1;
+            int tamanho_atual = strlen(resultado);
+            for (int j = posicao_atual + 1; j < tamanho_atual; j++)
+                resultado[j] = resultado[j + 1];
+            resultado[tamanho_atual - 1] = '\0';
+            if (posicao_atual > 0) posicao_atual--;
+        } else {
+            posicao_atual++;
         }
     }
 
