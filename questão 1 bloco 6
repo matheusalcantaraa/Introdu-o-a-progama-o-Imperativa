@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int **alocar(int linha, int coluna) {
+    int **matriz = malloc(linha * sizeof(int *));
+    for (int i = 0; i < linha; i++) {
+        matriz[i] = malloc(coluna * sizeof(int));
+    }
+    return matriz;
+}
+
+void ler(int **matriz, int linha, int coluna) {
+    for (int i = 0; i < linha; i++) {
+        for (int j = 0; j < coluna; j++) {
+            scanf("%d", &matriz[i][j]);
+        }
+    }
+}
+
+void imprimir(int **matriz, int linha, int coluna) {
+    for (int i = 0; i < linha; i++) {
+        for (int j = 0; j < coluna; j++) {
+            if (j > 0) printf(" ");
+            printf("%d", matriz[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void liberar(int **matriz, int linha) {
+    for (int i = 0; i < linha; i++) {
+        free(matriz[i]);
+    }
+    free(matriz);
+}
+
+void aplicar(int **matriz, int linha, int coluna, int (*operacao)(int)) {
+    for (int i = 0; i < linha; i++) {
+        for (int j = 0; j < coluna; j++) {
+            matriz[i][j] = operacao(matriz[i][j]);
+        }
+    }
+}
+
+int dobro(int x) { 
+    return 2 * x; 
+}
+int quadrado(int x) { 
+    return x * x; 
+}
+int absoluto(int x) { 
+    if (x < 0) {
+        return -x;
+    }else{  
+        return x;
+    }
+}
+
+int main() {
+    int linha, coluna, op;
+    scanf("%d %d", &linha, &coluna);
+
+    int **matriz = alocar(linha, coluna);
+    ler(matriz, linha, coluna);
+    scanf("%d", &op);
+
+    int (*operacao)(int) = NULL;
+    if (op == 1) {
+        operacao = dobro;
+    } else if (op == 2) {
+        operacao = quadrado;
+    } else if (op == 3) {
+        operacao = absoluto;
+    }
+
+    aplicar(matriz, linha, coluna, operacao);
+    imprimir(matriz, linha, coluna);
+    liberar(matriz, linha);
+
+    return 0;
+}
