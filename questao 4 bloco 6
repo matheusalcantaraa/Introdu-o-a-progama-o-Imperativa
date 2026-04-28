@@ -1,0 +1,275 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+enum Tipo {
+    FOGO,
+    AGUA,
+    ELETRICIDADE,
+    PLANTA
+};
+
+struct Pokemon {
+    int id;
+    char nome[50];
+    enum Tipo tipo;
+    int xp;
+    int ataque;
+    int ordem_registro;
+};
+
+struct Treinador {
+    char nome[50];
+    char cpf[20];
+    int idade;
+    struct Pokemon *pokemons;
+    int quantidade_pokemons;
+    int ordem_cadastro;
+};
+
+struct Sistema {
+    struct Treinador *treinadores;
+    int quantidade_treinadores;
+    int contador_cadastro;
+    int contador_registro;
+};
+
+char *tipo_para_string(enum Tipo tipo) {
+    if (tipo == FOGO) {
+        return "Fogo";
+    } else if (tipo == AGUA) {
+        return "Agua";
+    } else if (tipo == ELETRICIDADE) {
+        return "Eletricidade";
+    } else {
+        return "Planta";
+    }
+}
+
+enum Tipo string_para_tipo(int codigo) {
+    if (codigo == 0) {
+        return FOGO;
+    } else if (codigo == 1) {
+        return AGUA;
+    } else if (codigo == 2) {
+        return ELETRICIDADE;
+    } else {
+        return PLANTA;
+    }
+}
+
+int calcular_forca(struct Pokemon *pokemon) {
+    return 2*pokemon->xp + pokemon->ataque;
+}
+
+int calcular_nivel(struct Treinador *treinador) {
+    int nivel = 0, i;
+    for (i = 0; i < treinador->quantidade_pokemons; i++) {
+        nivel += calcular_forca(&treinador->pokemons[i]);
+    }
+    return nivel;
+}
+
+int buscar_treinador(struct Sistema *sistema, char *cpf) {
+    int i;
+    for (i = 0; i < sistema->quantidade_treinadores; i++) {
+        if (strcmp(sistema->treinadores[i].cpf, cpf) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void cadastrar_treinador(struct Sistema *sistema) {
+    char nome[50], cpf[20];
+    int idade;
+    scanf("%s %s %d", nome, cpf, &idade);
+
+    if (buscar_treinador(sistema, cpf) != -1) {
+        return;
+    }
+
+    sistema->quantidade_treinadores++;
+    sistema->treinadores = realloc(sistema->treinadores, sistema->quantidade_treinadores * sizeof(struct Treinador));
+
+    struct Treinador *treinador = &sistema->treinadores[sistema->quantidade_treinadores - 1];
+    strcpy(treinador->nome, nome);
+    strcpy(treinador->cpf, cpf);
+    treinador->idade = idade;
+    treinador->pokemons = NULL;
+    treinador->quantidade_pokemons = 0;
+    treinador->ordem_cadastro = sistema->contador_cadastro++;
+}
+
+void cadastrar_pokemon(struct Sistema *sistema) {
+    char cpf[20], nome_pokemon[50];
+    int id, xp, ataque, codigo_tipo;
+    scanf("%s %d %s %d %d %d", cpf, &id, nome_pokemon, &xp, &ataque, &codigo_tipo);
+
+    int indice = buscar_treinador(sistema, cpf);
+    if (indice == -1) {
+        return;
+    }
+
+    struct Treinador *treinador = &sistema->treinadores[indice];
+    int i;
+    for (i = 0; i < treinador->quantidade_pokemons; i++) {
+        if (treinador->pokemons[i].id == id) {
+            return;
+        }
+    }
+
+    treinador->quantidade_pokemons++;
+    treinador->pokemons = realloc(treinador->pokemons, treinador->quantidade_pokemons * sizeof(struct Pokemon));
+
+    struct Pokemon *pokemon = &treinador->pokemons[treinador->quantidade_pokemons - 1];
+    pokemon->id = id;
+    strcpy(pokemon->nome, nome_pokemon);
+    pokemon->xp = xp;
+    pokemon->ataque = ataque;
+    pokemon->tipo = string_para_tipo(codigo_tipo);
+    pokemon->ordem_registro = sistema->contador_registro++;
+}
+
+int comparar_pokemons(const void *a, const void *b) {
+    struct Pokemon *pa = (struct Pokemon *)a;
+    struct Pokemon *pb = (struct Pokemon *)b;
+    int forca_a = calcular_forca(pa);
+    int forca_b = calcular_forca(pb);
+    if (forca_b != forca_a) {
+        return forca_b - forca_a;
+    }
+    return pa->ordem_registro - pb->ordem_registro;
+}
+
+int comparar_treinadores(const void *a, const void *b) {
+    struct Treinador *ta = (struct Treinador *)a;
+    struct Treinador *tb = (struct Treinador *)b;
+    int nivel_a = calcular_nivel(ta);
+    int nivel_b = calcular_nivel(tb);
+    if (nivel_b != nivel_a) {
+        return nivel_b - nivel_a;
+    }
+    return ta->ordem_cadastro - tb->ordem_cadastro;
+}
+
+void listar_classificacao(struct Sistema *sistema) {
+    struct Treinador *copia = malloc(sistema->quantidade_treinadores * sizeof(struct Treinador));
+    int i;
+    for (i = 0; i < sistema->quantidade_treinadores; i++) {
+        copia[i] = sistema->treinadores[i];
+        copia[i].pokemons = malloc(copia[i].quantidade_pokemons * sizeof(struct Pokemon));
+        memcpy(copia[i].pokemons, sistema->treinadores[i].pokemons,
+               copia[i].quantidade_pokemons * sizeof(struct Pokemon));
+        qsort(copia[i].pokemons, copia[i].quantidade_pokemons,
+              sizeof(struct Pokemon), comparar_pokemons);
+    }
+
+    qsort(copia, sistema->quantidade_treinadores, sizeof(struct Treinador), comparar_treinadores);
+
+    printf("Classificação atual\n");
+    for (i = 0; i < sistema->quantidade_treinadores; i++) {
+        printf("T: %s, CPF: %s, Nivel: %d\n",
+               copia[i].nome, copia[i].cpf, calcular_nivel(&copia[i]));
+        int j;
+        for (j = 0; j < copia[i].quantidade_pokemons; j++) {
+            struct Pokemon *p = &copia[i].pokemons[j];
+            printf("  P: %d, %s, %d, %d, %s\n", p->id, p->nome, p->xp, p->ataque, tipo_para_string(p->tipo));
+        }
+        free(copia[i].pokemons);
+    }
+    free(copia);
+}
+
+void remover_treinador(struct Sistema *sistema) {
+    char cpf[20];
+    scanf("%s", cpf);
+
+    int indice = buscar_treinador(sistema, cpf);
+    if (indice == -1) {
+        return;
+    }
+
+    free(sistema->treinadores[indice].pokemons);
+
+    int i;
+    for (i = indice; i < sistema->quantidade_treinadores - 1; i++) {
+        sistema->treinadores[i] = sistema->treinadores[i + 1];
+    }
+    sistema->quantidade_treinadores--;
+    sistema->treinadores = realloc(sistema->treinadores, sistema->quantidade_treinadores * sizeof(struct Treinador));
+}
+
+void atualizar_pokemon(struct Sistema *sistema) {
+    char cpf[20], nome_pokemon[50];
+    int id, xp, ataque, codigo_tipo;
+    scanf("%s %d %s %d %d %d", cpf, &id, nome_pokemon, &xp, &ataque, &codigo_tipo);
+
+    int indice = buscar_treinador(sistema, cpf);
+    if (indice == -1) {
+        return;
+    }
+
+    struct Treinador *treinador = &sistema->treinadores[indice];
+    int i;
+    for (i = 0; i < treinador->quantidade_pokemons; i++) {
+        if (treinador->pokemons[i].id == id) {
+            strcpy(treinador->pokemons[i].nome, nome_pokemon);
+            treinador->pokemons[i].xp = xp;
+            treinador->pokemons[i].ataque = ataque;
+            treinador->pokemons[i].tipo = string_para_tipo(codigo_tipo);
+            return;
+        }
+    }
+}
+
+void liberar_sistema(struct Sistema *sistema) {
+    int i;
+    for (i = 0; i < sistema->quantidade_treinadores; i++) {
+        free(sistema->treinadores[i].pokemons);
+    }
+    free(sistema->treinadores);
+}
+
+struct Operacoes {
+    void (*cadastrar_treinador)(struct Sistema *);
+    void (*cadastrar_pokemon)(struct Sistema *);
+    void (*listar_classificacao)(struct Sistema *);
+    void (*remover_treinador)(struct Sistema *);
+    void (*atualizar_pokemon)(struct Sistema *);
+    void (*liberar_sistema)(struct Sistema *);
+};
+
+int main() {
+    struct Sistema sistema;
+    sistema.treinadores = NULL;
+    sistema.quantidade_treinadores = 0;
+    sistema.contador_cadastro = 0;
+    sistema.contador_registro = 0;
+
+    struct Operacoes ops;
+    ops.cadastrar_treinador = cadastrar_treinador;
+    ops.cadastrar_pokemon = cadastrar_pokemon;
+    ops.listar_classificacao = listar_classificacao;
+    ops.remover_treinador = remover_treinador;
+    ops.atualizar_pokemon = atualizar_pokemon;
+    ops.liberar_sistema = liberar_sistema;
+
+    int comando;
+    while (scanf("%d", &comando) == 1 && comando != 0) {
+        if (comando == 1) {
+            ops.cadastrar_treinador(&sistema);
+        } else if (comando == 2) {
+            ops.cadastrar_pokemon(&sistema);
+        } else if (comando == 3) {
+            ops.listar_classificacao(&sistema);
+        } else if (comando == 4) {
+            ops.remover_treinador(&sistema);
+        } else if (comando == 5) {
+            ops.atualizar_pokemon(&sistema);
+        }
+    }
+
+    ops.liberar_sistema(&sistema);
+    return 0;
+}
