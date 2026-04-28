@@ -1,0 +1,264 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void alocar_matriz(int **matriz, int linhas, int colunas) {
+    int i;
+    for (i = 0; i < linhas; i++) {
+        matriz[i] = malloc(colunas * sizeof(int));
+    }
+}
+
+void liberar_matriz(int **matriz, int linhas) {
+    int i;
+    for (i = 0; i < linhas; i++) {
+        free(matriz[i]);
+    }
+}
+
+void copiar_matriz(int **origem, int **destino, int linhas, int colunas) {
+    int i, j;
+    for (i = 0; i < linhas; i++) {
+        for (j = 0; j < colunas; j++) {
+            destino[i][j] = origem[i][j];
+        }
+    }
+}
+
+void imprimir_matriz(int **matriz, int linhas, int colunas) {
+    int i, j;
+    for (i = 0; i < linhas; i++) {
+        for (j = 0; j < colunas; j++) {
+            if (j > 0) {
+                printf(" ");
+            }
+            printf("%d", matriz[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int dentro_da_matriz(int linha, int coluna, int linhas, int colunas) {
+    return linha >= 0 && linha < linhas && coluna >= 0 && coluna < colunas;
+}
+
+int esta_na_lista(int *lista, int tamanho, int linha, int coluna) {
+    int i;
+    for (i = 0; i < tamanho; i++) {
+        if (lista[i*2] == linha && lista[i*2 + 1] == coluna) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void calcular_camadas(int centro_linha, int centro_coluna, int linhas, int colunas,
+                      int *camada1, int *tamanho1,
+                      int *camada2, int *tamanho2) {
+    int deslocamento_linha1[]  = {0, -1, 1,  0, 0};
+    int deslocamento_coluna1[] = {0,  0, 0, -1, 1};
+    int deslocamento_linha8[]  = {-1, -1, -1, 0, 0,  1, 1, 1};
+    int deslocamento_coluna8[] = {-1,  0,  1, -1, 1, -1, 0, 1};
+    int k, i, vizinho_linha, vizinho_coluna;
+
+    *tamanho1 = 0;
+    for (k = 0; k < 5; k++) {
+        vizinho_linha  = centro_linha  + deslocamento_linha1[k];
+        vizinho_coluna = centro_coluna + deslocamento_coluna1[k];
+        if (dentro_da_matriz(vizinho_linha, vizinho_coluna, linhas, colunas)) {
+            camada1[(*tamanho1)*2]     = vizinho_linha;
+            camada1[(*tamanho1)*2 + 1] = vizinho_coluna;
+            (*tamanho1)++;
+        }
+    }
+
+    *tamanho2 = 0;
+    for (i = 0; i < *tamanho1; i++) {
+        int celula_linha  = camada1[i*2];
+        int celula_coluna = camada1[i*2 + 1];
+        for (k = 0; k < 8; k++) {
+            vizinho_linha  = celula_linha  + deslocamento_linha8[k];
+            vizinho_coluna = celula_coluna + deslocamento_coluna8[k];
+            if (dentro_da_matriz(vizinho_linha, vizinho_coluna, linhas, colunas) &&
+                !esta_na_lista(camada1, *tamanho1, vizinho_linha, vizinho_coluna) &&
+                !esta_na_lista(camada2, *tamanho2, vizinho_linha, vizinho_coluna)) {
+                camada2[(*tamanho2)*2]     = vizinho_linha;
+                camada2[(*tamanho2)*2 + 1] = vizinho_coluna;
+                (*tamanho2)++;
+            }
+        }
+    }
+}
+
+void explosao_arcana(int **matriz, int linhas, int colunas, int centro_linha, int centro_coluna) {
+    int *camada1 = malloc(10 * sizeof(int));
+    int *camada2 = malloc(100 * sizeof(int));
+    int tamanho1, tamanho2, i, novo_hp;
+
+    calcular_camadas(centro_linha, centro_coluna, linhas, colunas,
+                     camada1, &tamanho1, camada2, &tamanho2);
+
+    int **resultado = malloc(linhas * sizeof(int *));
+    alocar_matriz(resultado, linhas, colunas);
+    copiar_matriz(matriz, resultado, linhas, colunas);
+
+    for (i = 0; i < tamanho1; i++) {
+        int linha  = camada1[i*2];
+        int coluna = camada1[i*2 + 1];
+        novo_hp = resultado[linha][coluna] - 50;
+        if (novo_hp < 0) {
+            novo_hp = 0;
+        }
+        resultado[linha][coluna] = novo_hp;
+    }
+
+    for (i = 0; i < tamanho2; i++) {
+        int linha  = camada2[i*2];
+        int coluna = camada2[i*2 + 1];
+        novo_hp = resultado[linha][coluna] - 25;
+        if (novo_hp < 0) {
+            novo_hp = 0;
+        }
+        resultado[linha][coluna] = novo_hp;
+    }
+
+    printf("Estado do mapa após usar a Explosão Arcana:\n");
+    imprimir_matriz(resultado, linhas, colunas);
+    liberar_matriz(resultado, linhas);
+    free(resultado);
+    free(camada1);
+    free(camada2);
+}
+
+int contar_vizinhos_vivos(int **matriz, int linhas, int colunas, int linha, int coluna) {
+    int deslocamento_linha[]  = {-1, -1, -1, 0, 0,  1, 1, 1};
+    int deslocamento_coluna[] = {-1,  0,  1, -1, 1, -1, 0, 1};
+    int total = 0, k;
+    for (k = 0; k < 8; k++) {
+        int vizinho_linha  = linha  + deslocamento_linha[k];
+        int vizinho_coluna = coluna + deslocamento_coluna[k];
+        if (dentro_da_matriz(vizinho_linha, vizinho_coluna, linhas, colunas) &&
+            matriz[vizinho_linha][vizinho_coluna] > 0) {
+            total++;
+        }
+    }
+    return total;
+}
+
+void nuvem_venenosa_turno(int **matriz_atual, int **proximo_estado,
+                          int linhas, int colunas,
+                          int *camada1, int tamanho1,
+                          int *camada2, int tamanho2) {
+    copiar_matriz(matriz_atual, proximo_estado, linhas, colunas);
+    int i, vizinhos_vivos, dano, novo_hp;
+
+    for (i = 0; i < tamanho1; i++) {
+        int linha  = camada1[i*2];
+        int coluna = camada1[i*2 + 1];
+        vizinhos_vivos = contar_vizinhos_vivos(matriz_atual, linhas, colunas, linha, coluna);
+        dano    = 5 + 8*vizinhos_vivos;
+        novo_hp = proximo_estado[linha][coluna] - dano;
+        if (novo_hp < 0) {
+            novo_hp = 0;
+        }
+        proximo_estado[linha][coluna] = novo_hp;
+    }
+
+    for (i = 0; i < tamanho2; i++) {
+        int linha  = camada2[i*2];
+        int coluna = camada2[i*2 + 1];
+        vizinhos_vivos = contar_vizinhos_vivos(matriz_atual, linhas, colunas, linha, coluna);
+        dano    = 5 + 8*vizinhos_vivos;
+        novo_hp = proximo_estado[linha][coluna] - dano;
+        if (novo_hp < 0) {
+            novo_hp = 0;
+        }
+        proximo_estado[linha][coluna] = novo_hp;
+    }
+}
+
+int todas_zeradas(int **matriz, int *camada1, int tamanho1, int *camada2, int tamanho2) {
+    int i;
+    for (i = 0; i < tamanho1; i++) {
+        if (matriz[camada1[i*2]][camada1[i*2 + 1]] > 0) {
+            return 0;
+        }
+    }
+    for (i = 0; i < tamanho2; i++) {
+        if (matriz[camada2[i*2]][camada2[i*2 + 1]] > 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void nuvem_venenosa(int **matriz, int linhas, int colunas, int centro_linha, int centro_coluna) {
+    int *camada1 = malloc(10 * sizeof(int));
+    int *camada2 = malloc(100 * sizeof(int));
+    int tamanho1, tamanho2;
+    calcular_camadas(centro_linha, centro_coluna, linhas, colunas,
+                     camada1, &tamanho1, camada2, &tamanho2);
+
+    int **estado_atual = malloc(linhas * sizeof(int *));
+    int **proximo_estado = malloc(linhas * sizeof(int *));
+    alocar_matriz(estado_atual, linhas, colunas);
+    alocar_matriz(proximo_estado, linhas, colunas);
+    copiar_matriz(matriz, estado_atual, linhas, colunas);
+
+    printf("Estado do mapa, por turno, após usar a Nuvem Venenosa:\n");
+
+    int turno = 1;
+    while (turno <= 3 && !todas_zeradas(estado_atual, camada1, tamanho1, camada2, tamanho2)) {
+        nuvem_venenosa_turno(estado_atual, proximo_estado, linhas, colunas,
+                             camada1, tamanho1, camada2, tamanho2);
+        copiar_matriz(proximo_estado, estado_atual, linhas, colunas);
+        imprimir_matriz(estado_atual, linhas, colunas);
+        printf("\n");
+        turno++;
+    }
+
+    liberar_matriz(estado_atual, linhas);
+    liberar_matriz(proximo_estado, linhas);
+    free(estado_atual);
+    free(proximo_estado);
+    free(camada1);
+    free(camada2);
+}
+
+int main() {
+    int linhas, colunas;
+    scanf("%d %d", &linhas, &colunas);
+
+    int **matriz_original = malloc(linhas * sizeof(int *));
+    alocar_matriz(matriz_original, linhas, colunas);
+    int i, j;
+    for (i = 0; i < linhas; i++) {
+        for (j = 0; j < colunas; j++) {
+            scanf("%d", &matriz_original[i][j]);
+        }
+    }
+
+    int centro_linha, centro_coluna;
+    scanf("%d %d", &centro_linha, &centro_coluna);
+
+    char tipo_ataque[30];
+    scanf("%s", tipo_ataque);
+
+    printf("Estado inicial do mapa:\n");
+    imprimir_matriz(matriz_original, linhas, colunas);
+    printf("\n");
+
+    void (*ataque)(int **, int, int, int, int) = NULL;
+
+    if (strcmp(tipo_ataque, "EXPLOSAO_ARCANA") == 0) {
+        ataque = explosao_arcana;
+    } else if (strcmp(tipo_ataque, "NUVEM_VENENOSA") == 0) {
+        ataque = nuvem_venenosa;
+    }
+
+    ataque(matriz_original, linhas, colunas, centro_linha, centro_coluna);
+
+    liberar_matriz(matriz_original, linhas);
+    free(matriz_original);
+    return 0;
+}
